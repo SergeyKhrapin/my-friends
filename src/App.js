@@ -3,9 +3,10 @@ import getMyFriends from "./utils/getMyFriends"
 import UserList from "./components/UserList"
 import UserListEmpty from "./components/UserListEmpty"
 import LoadMore from "./components/LoadMore"
+import Loading from "./components/Loading"
 
 const App = () => {
-  const [friends, setFriends] = useState({})
+  const [friends, setFriends] = useState(null)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
@@ -21,7 +22,9 @@ const App = () => {
     setPage((page) => page + 1)
   }
 
-  return Object.keys(friends).length ? (
+  return !friends ? (
+    <Loading />
+  ) : Object.keys(friends).length ? (
     <>
       <UserList friends={friends} />
       <LoadMore onClick={loadMoreHandler} />
