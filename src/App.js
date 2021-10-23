@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react"
+import getMyFriends from "./utils/getMyFriends"
+import UserList from "./components/UserList"
+import UserListEmpty from "./components/UserListEmpty"
+import LoadMore from "./components/LoadMore"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+  const [friends, setFriends] = useState({})
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    (async () => {
+      const response = await getMyFriends(page)
+      setFriends((state) => {
+        return { ...state, ...response }
+      })
+    })()
+  }, [page])
+
+  const loadMoreHandler = async () => {
+    setPage((page) => page + 1)
+  }
+
+  return Object.keys(friends).length ? (
+    <>
+      <UserList friends={friends} />
+      <LoadMore onClick={loadMoreHandler} />
+    </>
+  ) : (
+    <UserListEmpty />
+  )
 }
 
-export default App;
+export default App
