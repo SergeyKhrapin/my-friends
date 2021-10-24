@@ -4,6 +4,8 @@ import UserList from "./components/UserList"
 import LoadMore from "./components/LoadMore"
 import Loading from "./components/Loading"
 import Error from "./components/Error"
+import createAction from './store/action'
+import { FETCH_FRIENDS, LOAD_MORE, ERROR} from './store/const'
 
 const App = () => {
 	const initialState = {
@@ -14,15 +16,15 @@ const App = () => {
 	}
 	const reducer = (state, action) => {
 		switch (action.type) {
-			case 'FETCH_FRIENDS':
+			case FETCH_FRIENDS:
 				return {
 					...state,
 					list: {...state.list, ...action.payload.friends},
 					showLoadMore: state.page < action.payload.totalPages
 				}
-			case 'LOAD_MORE':
+			case LOAD_MORE:
 				return {...state, page: state.page + 1}
-			case 'ERROR':
+			case ERROR:
 				return {...state, error: action.payload}
 		}
 	}
@@ -32,26 +34,18 @@ const App = () => {
     (async () => {
       const { friends, error, total_pages } = await getMyFriends(state.page)
 			if (!error) {
-				dispatch({
-					type: 'FETCH_FRIENDS',
-					payload: {
-						friends,
-						totalPages: total_pages
-					},
-				})
+				dispatch(createAction(FETCH_FRIENDS, {
+					friends,
+					totalPages: total_pages
+				}))
 			} else {
-				dispatch({
-					type: 'ERROR',
-					payload: error,
-				})
+				dispatch(createAction(ERROR, error))
 			}
     })()
   }, [state.page])
 
   const loadMoreHandler = async () => {
-		dispatch({
-			type: 'LOAD_MORE',
-		})
+		dispatch(createAction(LOAD_MORE))
   }
 
 	if (state.error) {
