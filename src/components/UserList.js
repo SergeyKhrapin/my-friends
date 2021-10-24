@@ -1,8 +1,8 @@
 const UserList = ({ friends }) => {
   return (
     <ul>
-      {Object.values(friends).map((name) =>
-        name.trim().length ? <li>{name}</li> : null
+      {Object.values(friends).map((name, i) =>
+        name.trim().length ? <li key={i}>{name}</li> : null
       )}
     </ul>
   )
