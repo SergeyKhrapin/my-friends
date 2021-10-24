@@ -7,6 +7,7 @@ async function getMyFriends(page) {
         failed: null,
         statusOk: null,
       },
+      total_pages: null,
   }
   
   try {
@@ -16,13 +17,14 @@ async function getMyFriends(page) {
     // })
 
     if (response.ok) {
-        const { data } = await response.json()
+        const { data, total_pages } = await response.json()
         data?.map((friend = {}) => {
           Object.assign(myFriends.friends, {
             [friend.email]: `${friend.first_name || ""} ${friend.last_name || ""}`
           })
         })
         myFriends.error = null
+        myFriends.total_pages = total_pages
     } else {
         myFriends.error.statusOk = false
     }

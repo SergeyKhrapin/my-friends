@@ -7,16 +7,23 @@ import Loading from "./components/Loading"
 import Error from "./components/Error"
 
 const App = () => {
-  const [friends, setFriends] = useState(null)
+  const [{ list, showLoadMore }, setFriends] = useState({
+		list: null,
+		showLoadMore: true,
+	})
   const [error, setError] = useState(null)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
     (async () => {
-      const { friends, error } = await getMyFriends(page)
+      const { friends, error, total_pages } = await getMyFriends(page)
 			if (!error) {
 				setFriends((state) => {
-					return { ...state, ...friends }
+					return {
+						...state,
+						list: {...state.list, ...friends},
+						showLoadMore: page < total_pages
+					}
 				})
 			} else {
 				setError(error)
@@ -32,12 +39,12 @@ const App = () => {
 		return <Error error={error} />
 	}
 
-  return !friends && !error ? (
+  return !list && !error ? (
     <Loading />
-  ) : Object.keys(friends).length ? (
+  ) : Object.keys(list).length ? (
     <>
-      <UserList friends={friends} />
-      <LoadMore onClick={loadMoreHandler} />
+      <UserList friends={list} />
+      {showLoadMore && <LoadMore onClick={loadMoreHandler} />}
     </>
   ) : (
     <UserListEmpty />
