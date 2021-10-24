@@ -4,17 +4,23 @@ import UserList from "./components/UserList"
 import UserListEmpty from "./components/UserListEmpty"
 import LoadMore from "./components/LoadMore"
 import Loading from "./components/Loading"
+import Error from "./components/Error"
 
 const App = () => {
   const [friends, setFriends] = useState(null)
+  const [error, setError] = useState(null)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
     (async () => {
-      const response = await getMyFriends(page)
-      setFriends((state) => {
-        return { ...state, ...response }
-      })
+      const { friends, error } = await getMyFriends(page)
+			if (!error) {
+				setFriends((state) => {
+					return { ...state, ...friends }
+				})
+			} else {
+				setError(error)
+			}
     })()
   }, [page])
 
@@ -22,7 +28,11 @@ const App = () => {
     setPage((page) => page + 1)
   }
 
-  return !friends ? (
+	if (error) {
+		return <Error error={error} />
+	}
+
+  return !friends && !error ? (
     <Loading />
   ) : Object.keys(friends).length ? (
     <>
