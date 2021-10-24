@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useEffect, useReducer } from "react"
 import getMyFriends from "./utils/getMyFriends"
 import UserList from "./components/UserList"
 import LoadMore from "./components/LoadMore"
@@ -6,44 +6,64 @@ import Loading from "./components/Loading"
 import Error from "./components/Error"
 
 const App = () => {
-  const [{ list, showLoadMore }, setFriends] = useState({
+	const initialState = {
 		list: null,
 		showLoadMore: true,
-	})
-  const [error, setError] = useState(null)
-  const [page, setPage] = useState(1)
+		error: null,
+		page: 1,
+	}
+	const reducer = (state, action) => {
+		switch (action.type) {
+			case 'FETCH_FRIENDS':
+				return {
+					...state,
+					list: {...state.list, ...action.payload.friends},
+					showLoadMore: state.page < action.payload.totalPages
+				}
+			case 'LOAD_MORE':
+				return {...state, page: state.page + 1}
+			case 'ERROR':
+				return {...state, error: action.payload}
+		}
+	}
+	const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
     (async () => {
-      const { friends, error, total_pages } = await getMyFriends(page)
+      const { friends, error, total_pages } = await getMyFriends(state.page)
 			if (!error) {
-				setFriends((state) => {
-					return {
-						...state,
-						list: {...state.list, ...friends},
-						showLoadMore: page < total_pages
-					}
+				dispatch({
+					type: 'FETCH_FRIENDS',
+					payload: {
+						friends,
+						totalPages: total_pages
+					},
 				})
 			} else {
-				setError(error)
+				dispatch({
+					type: 'ERROR',
+					payload: error,
+				})
 			}
     })()
-  }, [page])
+  }, [state.page])
 
   const loadMoreHandler = async () => {
-    setPage((page) => page + 1)
+		dispatch({
+			type: 'LOAD_MORE',
+		})
   }
 
-	if (error) {
-		return <Error error={error} />
+	if (state.error) {
+		return <Error error={state.error} />
 	}
 
-  return !list && !error ? (
+  return !state.list && !state.error ? (
     <Loading />
   ) : (
     <>
-      <UserList friends={list} />
-      {showLoadMore && <LoadMore onClick={loadMoreHandler} />}
+      <UserList friends={state.list} />
+      {state.showLoadMore && <LoadMore onClick={loadMoreHandler} />}
     </>
   )
 }
