@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import getMyFriends from "./utils/getMyFriends"
 import UserList from "./components/UserList"
-import UserListEmpty from "./components/UserListEmpty"
 import LoadMore from "./components/LoadMore"
 import Loading from "./components/Loading"
 import Error from "./components/Error"
@@ -41,13 +40,11 @@ const App = () => {
 
   return !list && !error ? (
     <Loading />
-  ) : Object.keys(list).length ? (
+  ) : (
     <>
       <UserList friends={list} />
       {showLoadMore && <LoadMore onClick={loadMoreHandler} />}
     </>
-  ) : (
-    <UserListEmpty />
   )
 }
 
